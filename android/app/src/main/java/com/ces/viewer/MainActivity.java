@@ -29,7 +29,19 @@ public class MainActivity extends BridgeActivity {
                     }
                     return false;
                 }
+
+                @Override
+                public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                    android.util.Log.d("CESViewer", "Page started: " + url);
+                }
+
+                @Override
+                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                    android.util.Log.e("CESViewer", "WebView error: " + errorCode + " - " + description + " for URL: " + failingUrl);
+                }
             });
+            // Log User-Agent
+            android.util.Log.d("CESViewer", "WebView User-Agent: " + webView.getSettings().getUserAgentString());
         }
 
         // Enable edge-to-edge display
