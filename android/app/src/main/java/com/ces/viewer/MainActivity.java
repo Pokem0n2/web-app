@@ -15,6 +15,26 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Configure WebView to load external URLs in this WebView, not browser
+        WebView webView = this.getBridge().getWebView();
+        if (webView != null) {
+            // Set standard browser User-Agent
+            String desktopUA = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+            webView.getSettings().setUserAgentString(desktopUA);
+
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    // Load all http/https URLs in WebView
+                    if (url.startsWith("http://") || url.startsWith("https://")) {
+                        view.loadUrl(url);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
