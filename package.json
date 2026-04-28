@@ -12,7 +12,11 @@
     "type": "git",
     "url": "https://github.com/Pokem0n2/web-app.git"
   },
-  "keywords": ["capacitor", "webview", "ces"],
+  "keywords": [
+    "capacitor",
+    "webview",
+    "ces"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -22,7 +26,9 @@
   "dependencies": {
     "@capacitor/android": "^7.0.0",
     "@capacitor/cli": "^7.0.0",
-    "@capacitor/core": "^7.0.0"
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
