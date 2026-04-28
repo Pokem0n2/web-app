@@ -21,7 +21,7 @@ public class MainActivity extends BridgeActivity {
             webView.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    android.util.Log.d("CESViewer", "Loading URL: " + url);
+                    android.util.Log.d("CESViewer", "shouldOverrideUrlLoading: " + url);
                     // Load all URLs in the WebView (including http://)
                     if (url.startsWith("http://") || url.startsWith("https://")) {
                         view.loadUrl(url);
@@ -40,8 +40,11 @@ public class MainActivity extends BridgeActivity {
                     android.util.Log.e("CESViewer", "WebView error: " + errorCode + " - " + description + " for URL: " + failingUrl);
                 }
             });
-            // Log User-Agent
-            android.util.Log.d("CESViewer", "WebView User-Agent: " + webView.getSettings().getUserAgentString());
+
+            // Load the target URL directly in WebView
+            String targetUrl = "http://47.103.78.78:1118";
+            android.util.Log.d("CESViewer", "Loading target URL: " + targetUrl);
+            webView.loadUrl(targetUrl);
         }
 
         // Enable edge-to-edge display

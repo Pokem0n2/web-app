@@ -15,11 +15,7 @@ async function setupFullscreen() {
 // Redirect to CES service
 window.location.replace('http://47.103.78.78:1118');
 
-// Fallback if location.replace fails (e.g., blocked by intent)
-window.addEventListener('error', (e) => {
-  console.error('Page error:', e.message);
-});
-
+// Hide splash screen when ready
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await SplashScreen.hide();
@@ -27,10 +23,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Ignore
   }
   await setupFullscreen();
-
-  // Check if still on the app page (not navigated)
-  if (window.location.href.includes('index.html') || window.location.href === 'about:blank') {
-    // Fallback: direct navigation via Capacitor bridge
-    console.log('Fallback: attempting navigation');
-  }
 });
