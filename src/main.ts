@@ -13,7 +13,7 @@ async function setupFullscreen() {
 }
 
 // Redirect to CES service
-window.location.href = 'http://47.103.78.78:3078';
+window.location.href = 'http://47.103.78.78:1118';
 
 // Hide splash screen when ready
 document.addEventListener('DOMContentLoaded', async () => {
