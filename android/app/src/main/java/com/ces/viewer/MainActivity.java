@@ -3,6 +3,8 @@ package com.ces.viewer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -12,6 +14,22 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Force all URLs to load in this WebView, not external browser
+        WebView webView = this.getBridge().getWebView();
+        if (webView != null) {
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    // Load all URLs in the WebView (including http://)
+                    if (url.startsWith("http://") || url.startsWith("https://")) {
+                        view.loadUrl(url);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
 
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
