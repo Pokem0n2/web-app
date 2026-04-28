@@ -15,38 +15,6 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Force all URLs to load in this WebView, not external browser
-        WebView webView = this.getBridge().getWebView();
-        if (webView != null) {
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    android.util.Log.d("CESViewer", "shouldOverrideUrlLoading: " + url);
-                    // Load all URLs in the WebView (including http://)
-                    if (url.startsWith("http://") || url.startsWith("https://")) {
-                        view.loadUrl(url);
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                    android.util.Log.d("CESViewer", "Page started: " + url);
-                }
-
-                @Override
-                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    android.util.Log.e("CESViewer", "WebView error: " + errorCode + " - " + description + " for URL: " + failingUrl);
-                }
-            });
-
-            // Load the target URL directly in WebView
-            String targetUrl = "http://47.103.78.78:1118";
-            android.util.Log.d("CESViewer", "Loading target URL: " + targetUrl);
-            webView.loadUrl(targetUrl);
-        }
-
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
