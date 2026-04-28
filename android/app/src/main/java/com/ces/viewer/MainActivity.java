@@ -21,6 +21,7 @@ public class MainActivity extends BridgeActivity {
             webView.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    android.util.Log.d("CESViewer", "Loading URL: " + url);
                     // Load all URLs in the WebView (including http://)
                     if (url.startsWith("http://") || url.startsWith("https://")) {
                         view.loadUrl(url);
