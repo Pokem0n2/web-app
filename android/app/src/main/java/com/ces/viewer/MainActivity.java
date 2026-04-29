@@ -1,18 +1,19 @@
 package com.ces.viewer;
 
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.webkit.WebChromeClient;
+import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import android.util.Log;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TARGET_URL = "http://47.103.78.78:1118";
@@ -23,9 +24,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Create WebView programmatically
+        // Use edge-to-edge with status bar visible
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        // Create a container layout
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        setContentView(container);
+
+        // Create black spacer for status bar area
+        View statusBarSpacer = new View(this);
+        LinearLayout.LayoutParams spacerParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0
+        );
+        spacerParams.weight = 0;
+        // Get status bar height
+        int statusBarHeight = getStatusBarHeight();
+        spacerParams.height = statusBarHeight;
+        statusBarSpacer.setLayoutParams(spacerParams);
+        statusBarSpacer.setBackgroundColor(android.graphics.Color.BLACK);
+        container.addView(statusBarSpacer);
+
+        // Create WebView
         webView = new WebView(this);
-        setContentView(webView);
+        LinearLayout.LayoutParams webViewParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0,
+            1.0f
+        );
+        webView.setLayoutParams(webViewParams);
 
         // Configure WebView
         WebSettings settings = webView.getSettings();
@@ -47,11 +75,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 Log.d(TAG, "Loading URL: " + url);
-                // Keep all http/https in WebView
                 if (url.startsWith("http://") || url.startsWith("https://")) {
-                    return false; // false = let WebView handle it
+                    return false;
                 }
-                return true; // block non-http schemes
+                return true;
             }
 
             @Override
@@ -77,20 +104,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        container.addView(webView);
+
         // Load target URL
         Log.d(TAG, "Loading target: " + TARGET_URL);
         webView.loadUrl(TARGET_URL);
 
-        // Enable edge-to-edge and hide system bars
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        if (controller != null) {
-            controller.hide(WindowInsetsCompat.Type.systemBars());
-            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        }
-
         // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    private int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        Log.d(TAG, "Status bar height: " + result);
+        return result;
     }
 
     @Override
@@ -99,17 +130,5 @@ public class MainActivity extends AppCompatActivity {
             webView.destroy();
         }
         super.onDestroy();
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-            if (controller != null) {
-                controller.hide(WindowInsetsCompat.Type.systemBars());
-                controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            }
-        }
     }
 }
