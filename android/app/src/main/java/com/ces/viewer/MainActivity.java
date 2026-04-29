@@ -1,107 +1,87 @@
 package com.ces.viewer;
 
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.webkit.WebChromeClient;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import com.getcapacitor.BridgeActivity;
+import android.util.Log;
 
-public class MainActivity extends BridgeActivity {
+public class MainActivity extends AppCompatActivity {
     private static final String TARGET_URL = "http://47.103.78.78:1118";
+    private static final String TAG = "MainActivity";
+    private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Configure WebView BEFORE super.onCreate triggers initial load
-        // We do this AFTER super() because Bridge must be initialized first
-        final WebView webView = this.getBridge().getWebView();
+        // Create WebView programmatically
+        webView = new WebView(this);
+        setContentView(webView);
 
-        if (webView != null) {
-            WebSettings settings = webView.getSettings();
+        // Configure WebView
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUserAgentString(
+            "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        );
 
-            // Essential settings
-            settings.setJavaScriptEnabled(true);
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-            settings.setDomStorageEnabled(true);
-            settings.setDatabaseEnabled(true);
-
-            // Security
-            settings.setAllowFileAccess(false);
-            settings.setAllowContentAccess(false);
-
-            // Mobile User-Agent
-            settings.setUserAgentString(
-                "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-            );
-
-            // Caching
-            settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-
-            // Viewport
-            settings.setUseWideViewPort(true);
-            settings.setLoadWithOverviewMode(true);
-
-            // CRITICAL: Prevent any URL from opening in external browser
-            // Must be set BEFORE any page load
-            webView.setWebViewClient(new WebViewClient() {
-                private boolean initialLoadDone = false;
-
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    android.util.Log.d("MainActivity", "shouldOverrideUrlLoading: " + url);
-
-                    // Block FIRST load (Capacitor's local server) and redirect to target
-                    if (!initialLoadDone) {
-                        initialLoadDone = true;
-                        android.util.Log.d("MainActivity", "Blocking Capacitor local server, redirecting to: " + TARGET_URL);
-                        view.loadUrl(TARGET_URL);
-                        return true;
-                    }
-
-                    // After initial redirect, only block non-http(s) schemes
-                    // http/https MUST return false to stay in WebView
-                    if (url.startsWith("http://") || url.startsWith("https://")) {
-                        return false; // false = let WebView handle it (stays in app)
-                    }
-
-                    // Block tel:, geo:, etc. from opening external apps
-                    return true; // true = override, don't let system handle
+        // Set WebViewClient to keep navigation in WebView
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Log.d(TAG, "Loading URL: " + url);
+                // Keep all http/https in WebView
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return false; // false = let WebView handle it
                 }
+                return true; // block non-http schemes
+            }
 
-                @Override
-                public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                    android.util.Log.d("MainActivity", "onPageStarted: " + url);
-                    super.onPageStarted(view, url, favicon);
-                }
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                Log.d(TAG, "Page started: " + url);
+            }
 
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    android.util.Log.d("MainActivity", "onPageFinished: " + url);
-                    super.onPageFinished(view, url);
-                }
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.d(TAG, "Page finished: " + url);
+            }
 
-                @Override
-                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    android.util.Log.e("MainActivity", "ERROR " + errorCode + ": " + description + " (" + failingUrl + ")");
-                    super.onReceivedError(view, errorCode, description, failingUrl);
-                }
-            });
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                Log.e(TAG, "WebView error: " + errorCode + " - " + description);
+            }
+        });
 
-            webView.setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onProgressChanged(WebView view, int newProgress) {
-                    android.util.Log.d("MainActivity", "Progress: " + newProgress + "%");
-                }
-            });
-        }
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                Log.d(TAG, "Progress: " + newProgress + "%");
+            }
+        });
 
-        // Hide system bars for immersive fullscreen
+        // Load target URL
+        Log.d(TAG, "Loading target: " + TARGET_URL);
+        webView.loadUrl(TARGET_URL);
+
+        // Enable edge-to-edge and hide system bars
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (controller != null) {
@@ -109,7 +89,16 @@ public class MainActivity extends BridgeActivity {
             controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         }
 
+        // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.destroy();
+        }
+        super.onDestroy();
     }
 
     @Override
