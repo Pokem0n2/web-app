@@ -4,7 +4,8 @@
   "webDir": "dist",
   "server": {
     "androidScheme": "http",
-    "hostname": "localhost"
+    "hostname": "localhost",
+    "enableOnBackPress": false
   },
   "plugins": {
     "StatusBar": {
